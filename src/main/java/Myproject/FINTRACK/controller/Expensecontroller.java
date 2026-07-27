@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +33,12 @@ public class Expensecontroller {
    public List<Expense> getexpenses() {
        return expenseService.getExpenses();
    }
-   
-   
-
+   @GetMapping("/expenses/{id}")
+   public Expense getExpenseById(@PathVariable Long id) {
+       return expenseService.getExpenseById(id);
+   }
+   @PutMapping("/expenses/{id}")
+   public Expense updateExpense(@PathVariable Long id, @RequestBody Expense updatedExpense) {
+       return expenseService.updateExpense(id, updatedExpense);
+}
 }

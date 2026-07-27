@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import Myproject.FINTRACK.entity.Expense;
+import Myproject.FINTRACK.exception.ExpenseNotFoundException;
 import Myproject.FINTRACK.repository.ExpenseRepository;
 
 @Service
@@ -18,5 +19,20 @@ public class ExpenseService {
     }
     public List<Expense> getExpenses() {
         return repository.findAll();
+    }
+    public Expense getExpenseById(Long id) {
+        return repository.findById(id).orElse(null);
+    }
+    public Expense updateExpense(Long id, Expense updatedExpense) {
+        if(repository.findById(id).isPresent()) {
+            Expense existingExpense = repository.findById(id).get();
+            existingExpense.setTitle(updatedExpense.getTitle());
+            existingExpense.setAmount(updatedExpense.getAmount());
+            return repository.save(existingExpense);
+        }
+        else {
+            throw new ExpenseNotFoundException("Expense not found");
+        }
+        
     }
 }
