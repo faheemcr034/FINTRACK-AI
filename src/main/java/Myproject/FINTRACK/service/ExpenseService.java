@@ -1,20 +1,22 @@
 package Myproject.FINTRACK.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import Myproject.FINTRACK.entity.Expense;
+import Myproject.FINTRACK.repository.ExpenseRepository;
 
 @Service
 public class ExpenseService {
-    private List<Expense> expenses = new ArrayList<>();
+    private final ExpenseRepository repository;
+    public ExpenseService(ExpenseRepository repository) {
+        this.repository = repository;
+    }
     public Expense addExpense(Expense expense) {
-        expenses.add(expense);
-        return expense;
+        return repository.save(expense);
     }
     public List<Expense> getExpenses() {
-        return expenses;
+        return repository.findAll();
     }
 }

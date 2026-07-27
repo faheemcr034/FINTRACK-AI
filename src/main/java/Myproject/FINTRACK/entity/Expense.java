@@ -1,6 +1,13 @@
 package Myproject.FINTRACK.entity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 
+@Entity
 public class Expense {
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    private Long id;
     private String title;
     private double amount;
     private String category;
@@ -36,6 +43,14 @@ public class Expense {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
     
 }
