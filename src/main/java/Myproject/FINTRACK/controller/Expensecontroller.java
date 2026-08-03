@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import Myproject.FINTRACK.entity.Expense;
 import Myproject.FINTRACK.service.ExpenseService;
+import jakarta.validation.Valid;
 
 
 
@@ -28,7 +29,7 @@ public class Expensecontroller {
         this.expenseService = expenseService;
     }
    @PostMapping("/expense")
-   public Expense addexpense(@RequestBody Expense expense) {
+   public Expense addexpense(@Valid @RequestBody Expense expense) {
        return expenseService.addExpense(expense);
    }
    @GetMapping("/expenses")
