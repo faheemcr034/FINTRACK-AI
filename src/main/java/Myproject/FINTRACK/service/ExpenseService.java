@@ -35,4 +35,12 @@ public class ExpenseService {
         }
         
     }
+    public void deleteExpense(Long id) {
+        if(repository.findById(id).isPresent()) {
+            repository.deleteById(id);
+        }
+        else {
+            throw new ExpenseNotFoundException("Expense not found");
+        }
+    }
 }
