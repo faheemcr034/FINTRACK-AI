@@ -1,4 +1,6 @@
 package Myproject.FINTRACK.entity;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -16,7 +18,8 @@ public class Expense {
     private double amount;
     @NotBlank(message = "Category cannot be blank")
     private String category;
-    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     public Expense() {
     }
 
@@ -24,6 +27,7 @@ public class Expense {
         this.title = title;
         this.amount = amount;
         this.category = category;
+        this.createdAt = LocalDateTime.now();
     }
 
     public String getTitle() {
@@ -56,6 +60,22 @@ public class Expense {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
     
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import Myproject.FINTRACK.DTO.ExpenseDTO;
 import Myproject.FINTRACK.entity.Expense;
 import Myproject.FINTRACK.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -29,20 +30,20 @@ public class Expensecontroller {
         this.expenseService = expenseService;
     }
    @PostMapping("/expense")
-   public Expense addexpense(@Valid @RequestBody Expense expense) {
-       return expenseService.addExpense(expense);
+   public ExpenseDTO addexpense(@Valid @RequestBody ExpenseDTO expensedto) {
+       return expenseService.addExpense(expensedto);
    }
    @GetMapping("/expenses")
-   public List<Expense> getexpenses() {
+   public List<ExpenseDTO> getexpenses() {
        return expenseService.getExpenses();
    }
    @GetMapping("/expenses/{id}")
-   public Expense getExpenseById(@PathVariable Long id) {
+   public ExpenseDTO getExpenseById(@PathVariable Long id) {
        return expenseService.getExpenseById(id);
    }
    @PutMapping("/expenses/{id}")
-   public Expense updateExpense(@PathVariable Long id, @RequestBody Expense updatedExpense) {
-       return expenseService.updateExpense(id, updatedExpense);
+   public ExpenseDTO updateExpense(@PathVariable Long id, @RequestBody ExpenseDTO updatedExpensedto) {
+       return expenseService.updateExpense(id, updatedExpensedto);
 }
     @DeleteMapping("/expenses/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
