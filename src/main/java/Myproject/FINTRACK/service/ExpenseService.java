@@ -3,6 +3,8 @@ package Myproject.FINTRACK.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import Myproject.FINTRACK.DTO.ExpenseDTO;
@@ -13,13 +15,16 @@ import Myproject.FINTRACK.repository.ExpenseRepository;
 @Service
 public class ExpenseService {
     private final ExpenseRepository repository;
+    private static final Logger log = LoggerFactory.getLogger(ExpenseService.class);
     public ExpenseService(ExpenseRepository repository) {
         this.repository = repository;
     }
     //CRUD
     public ExpenseDTO addExpense(ExpenseDTO expensedto) {
+        log.info("Adding expense: {}", expensedto.getTitle());
         Expense expense = convertToEntity(expensedto);
         Expense savedExpense = repository.save(expense);
+        log.info("Expense added with ID: {}", savedExpense.getId());
         return convertToDTO(savedExpense);
     }
     public List<ExpenseDTO> getExpenses() {
@@ -32,8 +37,9 @@ public class ExpenseService {
     }
     
     public ExpenseDTO getExpenseById(Long id) {
-        Expense expense = repository.findById(id).orElseThrow(() -> new ExpenseNotFoundException("Expense not found"));
-        return convertToDTO(expense); 
+        Expense expense = repository.findById(id).orElseThrow(() -> { log.warn("Expense with ID {} not found", id); return new ExpenseNotFoundException("Expense not found"); });
+        log.info("Retrieved expense with ID: {}", id);
+        return convertToDTO(expense);
     }
     public ExpenseDTO updateExpense(Long id, ExpenseDTO updatedExpensedto) {
         if(repository.findById(id).isPresent()) {
@@ -41,9 +47,11 @@ public class ExpenseService {
             existingExpense.setTitle(updatedExpensedto.getTitle());
             existingExpense.setAmount(updatedExpensedto.getAmount());
             Expense updatedExpense = repository.save(existingExpense);
+            log.info("Expense with ID {} updated", id);
             return convertToDTO(updatedExpense);
         }
         else {
+            log.warn("Expense with ID {} not found for update", id);
             throw new ExpenseNotFoundException("Expense not found");
         }
         
@@ -53,6 +61,7 @@ public class ExpenseService {
             repository.deleteById(id);
         }
         else {
+            log.warn("Expense with ID {} not found for deletion", id);
             throw new ExpenseNotFoundException("Expense not found");
         }
     }
