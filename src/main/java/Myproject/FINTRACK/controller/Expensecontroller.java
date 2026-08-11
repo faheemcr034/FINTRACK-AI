@@ -2,7 +2,8 @@ package Myproject.FINTRACK.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +24,6 @@ import jakarta.validation.Valid;
 @RestController
 public class Expensecontroller {
     private final ExpenseService expenseService;
-    
-    List<Expense> expenses = new ArrayList<>();
 
     public Expensecontroller(ExpenseService expenseService) {
         this.expenseService = expenseService;
@@ -34,8 +33,8 @@ public class Expensecontroller {
        return expenseService.addExpense(expensedto);
    }
    @GetMapping("/expenses")
-   public List<ExpenseDTO> getexpenses() {
-       return expenseService.getExpenses();
+   public Page<ExpenseDTO> getexpenses(Pageable pageable) {
+       return expenseService.getExpenses(pageable);
    }
    @GetMapping("/expenses/{id}")
    public ExpenseDTO getExpenseById(@PathVariable Long id) {

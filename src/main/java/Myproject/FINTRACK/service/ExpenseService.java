@@ -1,10 +1,9 @@
 package Myproject.FINTRACK.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import Myproject.FINTRACK.DTO.ExpenseDTO;
@@ -27,14 +26,12 @@ public class ExpenseService {
         log.info("Expense added with ID: {}", savedExpense.getId());
         return convertToDTO(savedExpense);
     }
-    public List<ExpenseDTO> getExpenses() {
-        List<Expense> expenses = repository.findAll();
-        List<ExpenseDTO> expenseDTOs = new ArrayList<>();
-        for(Expense expense : expenses) {
-            expenseDTOs.add(convertToDTO(expense));
-        }
-        return expenseDTOs;
+
+    public Page<ExpenseDTO> getExpenses(Pageable pageable) {
+        Page<Expense> expensePage = repository.findAll(pageable);
+        return expensePage.map(this::convertToDTO);
     }
+        
     
     public ExpenseDTO getExpenseById(Long id) {
         Expense expense = repository.findById(id).orElseThrow(() -> { log.warn("Expense with ID {} not found", id); return new ExpenseNotFoundException("Expense not found"); });
