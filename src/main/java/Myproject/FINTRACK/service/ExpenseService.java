@@ -1,12 +1,16 @@
 package Myproject.FINTRACK.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
 import Myproject.FINTRACK.DTO.ExpenseDTO;
+import Myproject.FINTRACK.Specification.ExpenseSpecification;
+import static Myproject.FINTRACK.Specification.ExpenseSpecification.hasCategory;
 import Myproject.FINTRACK.entity.Expense;
 import Myproject.FINTRACK.exception.ExpenseNotFoundException;
 import Myproject.FINTRACK.repository.ExpenseRepository;
@@ -32,7 +36,27 @@ public class ExpenseService {
         return expensePage.map(this::convertToDTO);
     }
         
-    
+    public Page<ExpenseDTO> searchExpensesByTitle(String title, Pageable pageable) {
+        Page<Expense> expenses = repository.findByTitleContainingIgnoreCase(title, pageable);
+        return expenses.map(this::convertToDTO);
+    }
+
+    //category filtering
+    public Page<ExpenseDTO> getExpensesByCategory(String category, Pageable pageable) {
+        Page<Expense> expenses = repository.findByCategory(category, pageable);
+        return expenses.map(this::convertToDTO);
+    }
+    //category and title filtering
+    public Page<ExpenseDTO> findExpensesByTitleAndCategory(String search, String category, Pageable pageable) {
+        Page<Expense> expenses = repository.findByTitleAndCategory(search, category, pageable);
+        log.info("Showing results based on category and title you asked for");
+        return expenses.map(this::convertToDTO);
+    }
+    //amount range filtering
+    public Page<ExpenseDTO> findExpensesByAmountRange(Double minAmount, Double maxAmount, Pageable pageable) {
+        Page<Expense> expenses = repository.findByAmountRange(minAmount, maxAmount, pageable);
+        return expenses.map(this::convertToDTO);
+    }
     public ExpenseDTO getExpenseById(Long id) {
         Expense expense = repository.findById(id).orElseThrow(() -> { log.warn("Expense with ID {} not found", id); return new ExpenseNotFoundException("Expense not found"); });
         log.info("Retrieved expense with ID: {}", id);
@@ -77,4 +101,22 @@ public class ExpenseService {
         expenseDTO.setCategory(expense.getCategory());
         return expenseDTO;
     }
+    public Page<ExpenseDTO> FilterExpenses(String category, String search,double minAmount,double maxAmount, Pageable pageable) {
+        Specification<Expense> spec = Specification.unrestricted();
+        if (category != null && !category.isEmpty()) {
+            spec = spec.and(ExpenseSpecification.hasCategory(category));
+        }
+        if (search != null && !search.isEmpty()) {
+            spec = spec.and(ExpenseSpecification.titleContains(search));
+        }
+        if (minAmount != 0) {
+            spec = spec.and(ExpenseSpecification.hasMinAmount(minAmount));
+        }
+        if (maxAmount != 0) {
+            spec = spec.and(ExpenseSpecification.hasMaxAmount(maxAmount));
+        }
+        Page<Expense> expenses = repository.findAll(spec, pageable);
+        return expenses.map(this::convertToDTO);
+    }
+   
 }
