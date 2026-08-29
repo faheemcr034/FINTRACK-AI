@@ -1,5 +1,4 @@
 package Myproject.FINTRACK.repository;
-
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -11,10 +10,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import Myproject.FINTRACK.entity.Expense;
+
 @Repository
 public interface  ExpenseRepository  extends JpaRepository<Expense, Long>,JpaSpecificationExecutor<Expense> {
     Page<Expense> findByTitleContainingIgnoreCase(String title,Pageable pageable);
-
+    
+    Page<Expense> findByUserId(Long userId, Pageable pageable);
+    
     @Query("SELECT e FROM Expense e WHERE e.category = :category")
     Page<Expense> findByCategory(@Param("category") String category, Pageable pageable);
 
