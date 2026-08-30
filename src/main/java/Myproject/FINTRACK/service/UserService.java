@@ -1,4 +1,5 @@
 package Myproject.FINTRACK.service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -6,17 +7,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import Myproject.FINTRACK.DTO.RegisterDTO;
 import Myproject.FINTRACK.DTO.UserDTO;
 import Myproject.FINTRACK.entity.User;
+import Myproject.FINTRACK.exception.EmailAlreadyExistsException;
 import Myproject.FINTRACK.repository.UserRepository;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private Logger log = LoggerFactory.getLogger(UserService.class);
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+
+    //register user
+   public UserDTO registerUser(RegisterDTO registerDTO) {
+        log.info("Registering user: {}", registerDTO.getName());
+        if (userRepository.existsByEmail(registerDTO.getEmail())) {
+            log.warn("Email {} is already in use", registerDTO.getEmail());
+            throw new EmailAlreadyExistsException("Email is already in use");
+        }
+        User user = new User();
+        user.setName(registerDTO.getName());
+        user.setEmail(registerDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+        User savedUser = userRepository.save(user);
+        log.info("User registered successfully with ID: {}", savedUser.getId());
+        return convertToDTO(savedUser);
+    }
+
     // add user
     public UserDTO addUser(UserDTO userDTO) {
         log.info("Adding user: {}", userDTO.getName());
@@ -79,4 +101,5 @@ public class UserService {
         userDTO.setId(user.getId());
         return userDTO;
     }
+
 }
