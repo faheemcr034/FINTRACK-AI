@@ -19,5 +19,9 @@ public class GlobalExceptionHandler {
         public ResponseEntity<String> handleUserAlreadyExistsException(EmailAlreadyExistsException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
         }
+    @ExceptionHandler(IncorrectPasswordOrEmailException.class)
+        public ResponseEntity<String> handleIncorrectPasswordException(IncorrectPasswordOrEmailException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+        }
 }
 

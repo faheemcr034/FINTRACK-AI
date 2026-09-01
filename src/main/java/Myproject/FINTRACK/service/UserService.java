@@ -6,21 +6,26 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
+import Myproject.FINTRACK.DTO.LoginResponseDTO;
+import Myproject.FINTRACK.DTO.LoginDTO;
 import Myproject.FINTRACK.DTO.RegisterDTO;
 import Myproject.FINTRACK.DTO.UserDTO;
 import Myproject.FINTRACK.entity.User;
 import Myproject.FINTRACK.exception.EmailAlreadyExistsException;
+import Myproject.FINTRACK.exception.IncorrectPasswordOrEmailException;
 import Myproject.FINTRACK.repository.UserRepository;
+import Myproject.FINTRACK.security.JwtService;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
     private Logger log = LoggerFactory.getLogger(UserService.class);
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     //register user
@@ -38,6 +43,26 @@ public class UserService {
         log.info("User registered successfully with ID: {}", savedUser.getId());
         return convertToDTO(savedUser);
     }
+    //login user
+    public LoginResponseDTO loginUser(LoginDTO loginDTO){
+        log.info("Attempting login for email: {}", loginDTO.getEmail());
+        User user = userRepository.findByEmail(loginDTO.getEmail())
+                .orElseThrow(() -> {
+                    log.warn("User with email {} not found", loginDTO.getEmail());
+                    return new IncorrectPasswordOrEmailException("Invalid email or password");
+                });
+
+        if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+            log.warn("Invalid password for email: {}", loginDTO.getEmail());
+            throw new IncorrectPasswordOrEmailException("Invalid email or password");
+        }
+        //jwt token generation can be added here if needed
+        String token = jwtService.generateToken(user.getEmail());
+
+        log.info("User with email {} logged in successfully", loginDTO.getEmail());
+        return new LoginResponseDTO(token);
+    }
+
 
     // add user
     public UserDTO addUser(UserDTO userDTO) {
@@ -101,5 +126,4 @@ public class UserService {
         userDTO.setId(user.getId());
         return userDTO;
     }
-
 }

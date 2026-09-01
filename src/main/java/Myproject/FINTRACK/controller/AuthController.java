@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import Myproject.FINTRACK.DTO.RegisterDTO;
 import Myproject.FINTRACK.DTO.UserDTO;
+import Myproject.FINTRACK.DTO.LoginDTO;
 import Myproject.FINTRACK.service.UserService;
+import Myproject.FINTRACK.DTO.LoginResponseDTO;
 import jakarta.persistence.Entity;
 
 @RestController
@@ -24,5 +26,10 @@ public class AuthController {
         UserDTO registeredUser = userService.registerUser(registerDTO);
         return ResponseEntity.status(201).body(registeredUser);
     }
-
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> loginUser(@RequestBody LoginDTO loginDTO){
+        LoginResponseDTO response = userService.loginUser(loginDTO);
+        return ResponseEntity.ok(response);
+    }
+    
 }
