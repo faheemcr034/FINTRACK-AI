@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import Myproject.FINTRACK.DTO.ExpenseDTO;
@@ -25,9 +27,9 @@ public class ExpenseService {
         this.userRepository = userRepository;
     }
     //CRUD
-    public ExpenseDTO addExpense(ExpenseDTO expensedto,Long userId) {
+    public ExpenseDTO addExpense(ExpenseDTO expensedto) {
         log.info("Adding expense: {}", expensedto.getTitle());
-        User user = userRepository.findById(userId).orElseThrow(() -> { log.warn("User with ID {} not found", userId); return new RuntimeException("User not found"); });
+        User user = getCurrentUser();
         Expense expense = convertToEntity(expensedto);
         expense.setUser(user); // Set the user for the expense
         Expense savedExpense = repository.save(expense);
@@ -35,23 +37,31 @@ public class ExpenseService {
         return convertToDTO(savedExpense);
     }
 
+    //get current user
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (User) authentication.getPrincipal();
+    }
+
     public Page<ExpenseDTO> getExpenses(Pageable pageable) {
         Page<Expense> expensePage = repository.findAll(pageable);
         return expensePage.map(this::convertToDTO);
     }
     
-    public ExpenseDTO getExpenseById(Long id) {
-        Expense expense = repository.findById(id).orElseThrow(() -> { log.warn("Expense with ID {} not found", id); return new ExpenseNotFoundException("Expense not found"); });
-        log.info("Retrieved expense with ID: {}", id);
-        return convertToDTO(expense);
-    }
-    public Page<ExpenseDTO> getExpenseByUserId(Long userId, Pageable pageable) {
-        Page<Expense> expensePage = repository.findByUserId(userId, pageable);
+    public Page<ExpenseDTO> getExpenseByUserId(Pageable pageable) {
+        User user = getCurrentUser();
+        Page<Expense> expensePage = repository.findByUserId(user.getId(), pageable);
         return expensePage.map(this::convertToDTO);
     }
 
     public ExpenseDTO updateExpense(Long id, ExpenseDTO updatedExpensedto) {
         if(repository.findById(id).isPresent()) {
+            User user = getCurrentUser();
+            Expense expense = repository.findById(id).orElseThrow(() -> { log.warn("Expense with ID {} not found for update", id); return new ExpenseNotFoundException("Expense not found"); });
+            if (!expense.getUser().getId().equals(user.getId())) {
+                log.warn("User with ID {} is not authorized to update expense with ID {}", user.getId(), id);
+                throw new RuntimeException("You are not authorized to update this expense");
+            }
             Expense existingExpense = repository.findById(id).get();
             existingExpense.setTitle(updatedExpensedto.getTitle());
             existingExpense.setAmount(updatedExpensedto.getAmount());
@@ -65,15 +75,18 @@ public class ExpenseService {
         }
         
     }
+
     public void deleteExpense(Long id) {
-        if(repository.findById(id).isPresent()) {
-            repository.deleteById(id);
+        User user = getCurrentUser();
+        Expense expense = repository.findById(id).orElseThrow(() -> { log.warn("Expense with ID {} not found for deletion", id); return new ExpenseNotFoundException("Expense not found"); });
+        if (!expense.getUser().getId().equals(user.getId())) {
+            log.warn("User with ID {} is not authorized to delete expense with ID {}", user.getId(), id);
+            throw new RuntimeException("You are not authorized to delete this expense");
         }
-        else {
-            log.warn("Expense with ID {} not found for deletion", id);
-            throw new ExpenseNotFoundException("Expense not found");
-        }
+        repository.deleteById(id);
+        log.info("Expense with ID {} deleted", id);
     }
+
     //DTO conversions
     private Expense convertToEntity(ExpenseDTO expenseDTO) {
         Expense expense = new Expense();

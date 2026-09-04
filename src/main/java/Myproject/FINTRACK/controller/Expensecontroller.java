@@ -28,21 +28,18 @@ public class Expensecontroller {
         this.expenseService = expenseService;
     }
    @PostMapping("/expense")
-   public ExpenseDTO addexpense(@Valid @RequestBody ExpenseDTO expensedto,@RequestParam Long userId) {
-       return expenseService.addExpense(expensedto, userId);
+   public ExpenseDTO addexpense(@Valid @RequestBody ExpenseDTO expensedto) {
+       return expenseService.addExpense(expensedto);
    }
    @GetMapping("/expenses")
    public Page<ExpenseDTO> getexpenses(Pageable pageable) {
        return expenseService.getExpenses(pageable);
    }
-   @GetMapping("/expenses/{id}")
-   public ExpenseDTO getExpenseById(@PathVariable Long id) {
-       return expenseService.getExpenseById(id);
-   }
 
-   @GetMapping("/expenses/user/{userId}")
-   public Page<ExpenseDTO> getExpenseByUserId(@PathVariable Long userId, Pageable pageable) {
-       return expenseService.getExpenseByUserId(userId, pageable);
+
+   @GetMapping("/expenses/user")
+   public Page<ExpenseDTO> getExpenseByUserId(Pageable pageable) {
+       return expenseService.getExpenseByUserId(pageable);
    }
 
    @PutMapping("/expenses/{id}")
@@ -60,8 +57,6 @@ public class Expensecontroller {
             Pageable pageable) {
         return expenseService.FilterExpenses(category, search, minAmount, maxAmount, pageable);
     }
-
-
     @DeleteMapping("/expenses/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
         expenseService.deleteExpense(id);

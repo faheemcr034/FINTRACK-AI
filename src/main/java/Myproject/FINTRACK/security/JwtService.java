@@ -1,13 +1,12 @@
 package Myproject.FINTRACK.security;
 
-import javax.crypto.SecretKey;
-
 import java.util.Date;
 
 import javax.crypto.SecretKey;
 
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -46,8 +45,10 @@ public class JwtService {
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token);
+                System.out.println("Token is valid");
             return true;
         } catch (Exception e) {
+            System.out.println("Token is invalid: " + e.getMessage());
             return false;
         }
     }
